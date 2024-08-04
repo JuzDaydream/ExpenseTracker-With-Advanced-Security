@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="25dp"
+    android:background="@android:color/transparent">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardBackgroundColor="@color/darkgray"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="15dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/img"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:cardBackgroundColor="@color/gray"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="15dp"
+                    app:srcCompat="@mipmap/ic_launcher" />
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/budget_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:text="Budget"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@+id/img"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/budget_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RM500"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/budget_startDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="20/20/2020"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toEndOf="@+id/img"
+                app:layout_constraintStart_toStartOf="@+id/budget_name"
+                app:layout_constraintTop_toBottomOf="@+id/budget_name" />
+
+            <TextView
+                android:id="@+id/budget_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" - "
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@+id/budget_startDate"
+                app:layout_constraintStart_toEndOf="@+id/budget_startDate"
+                app:layout_constraintTop_toTopOf="@+id/budget_startDate" />
+
+            <TextView
+                android:id="@+id/budget_endDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20/20/2020"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@+id/budget_startDate"
+                app:layout_constraintStart_toEndOf="@+id/budget_to"
+                app:layout_constraintTop_toTopOf="@+id/budget_startDate" />
+
+            <TextView
+                android:id="@+id/budget_spent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Spent"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toEndOf="@+id/img"
+                app:layout_constraintStart_toStartOf="@+id/budget_name"
+                app:layout_constraintTop_toBottomOf="@+id/budget_startDate" />
+
+            <TextView
+                android:id="@+id/budget_spent_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="RM50"
+                android:textColor="@color/red"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@id/budget_name"
+                app:layout_constraintTop_toBottomOf="@id/budget_spent" />
+
+            <TextView
+                android:id="@+id/budget_remain_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RM50"
+                android:textColor="@color/green"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/budget_spent_amount" />
+
+            <TextView
+                android:id="@+id/budget_remain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Left"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="@+id/budget_remain_amount"
+                app:layout_constraintTop_toBottomOf="@+id/budget_startDate" />
+
+            <TextView
+                android:id="@+id/budget_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50%"
+                android:textColor="@color/green"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/budget_remain_amount"
+                app:layout_constraintStart_toEndOf="@+id/budget_spent_amount"
+                app:layout_constraintTop_toTopOf="@+id/budget_spent_amount" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

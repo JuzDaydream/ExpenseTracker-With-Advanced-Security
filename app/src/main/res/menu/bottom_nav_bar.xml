@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/transaction"
+        android:title="Transactions"
+        android:icon="@drawable/icon_transaction"/>
+    <item
+        android:id="@+id/budget"
+        android:title="Budgets"
+        android:icon="@drawable/icon_budget"/>
+    <item
+        android:id="@+id/saveGoal"
+        android:title="Saving Goals"
+        android:icon="@drawable/icon_save_goal"/>
+    <item
+        android:id="@+id/statistic"
+        android:title="Statistics"
+        android:icon="@drawable/icon_statistic"/>
+    <item
+        android:id="@+id/setting"
+        android:title="Settings"
+        android:icon="@drawable/icon_setting"/>
+
+</menu>
