@@ -40,17 +40,25 @@ class TransactionFragment : Fragment() {
         userID = (requireActivity() as MainActivity).getUserID()
 
         Log.d("TransactionFragment", "Selected Month: $selectedMonth")
-
         binding.btnAddTrans.setOnClickListener {
             showPopup()
         }
 
+        adapter = TransactionAdapter(ArrayList(), mutableMapOf()) { transaction ->
+            // Handle item click
+            val intent = Intent(requireContext(), EditTransactionActivity::class.java)
+            intent.putExtra("transactionID", transaction.id)
+            intent.putExtra("userID", userID)
+            startActivity(intent)
+        }
+        handleNoTransactions()
+
         binding.recyclerTransaction.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerTransaction.setHasFixedSize(true)
 
-        binding.tvIncomeAmount.visibility = View.GONE
-        binding.tvExpenseAmount.visibility = View.GONE
-        binding.tvBalanceAmount.visibility = View.GONE
+//        binding.tvIncomeAmount.visibility = View.GONE
+//        binding.tvExpenseAmount.visibility = View.GONE
+//        binding.tvBalanceAmount.visibility = View.GONE
         binding.recyclerTransaction.visibility = View.GONE
 
         binding.spinnerMonthYear.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
