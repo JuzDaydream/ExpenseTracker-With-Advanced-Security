@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,9 +13,11 @@ import com.example.expensetracker.data.Transaction
 import com.example.expensetracker.data.User
 import com.example.expensetracker.dataAdapter.BudgetAdapter
 import com.example.expensetracker.databinding.FragmentBudgetBinding
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.absoluteValue
 
 class BudgetFragment : Fragment() {
     private lateinit var binding: FragmentBudgetBinding
@@ -35,14 +38,30 @@ class BudgetFragment : Fragment() {
         binding = FragmentBudgetBinding.inflate(inflater, container, false)
         val view = binding.root
         userID = (requireActivity() as MainActivity).getUserID()
+// Find the FloatingActionButton in the inflated view
+        val btnAddBudget = view.findViewById<FloatingActionButton>(R.id.btn_addBudget)
 
-        adapter = BudgetAdapter(ArrayList(), ArrayList(), mutableMapOf())
+
+        // Set an OnClickListener on the button
+        btnAddBudget.setOnClickListener {
+            val intent = Intent(requireContext(), AddBudgetActivity::class.java)
+            intent.putExtra("userID", userID)
+            startActivity(intent)
+        }
+
+
+        // Pass the click handler to the adapter
+        adapter = BudgetAdapter(ArrayList(), ArrayList(), mutableMapOf()) { budget ->
+            // Handle the click event
+            val intent = Intent(requireContext(), EditBudgetActivity::class.java)
+            intent.putExtra("budgetID", budget.id)
+            intent.putExtra("userID", userID)
+            startActivity(intent)
+        }
         binding.recyclerBudget.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerBudget.setHasFixedSize(true)
         binding.recyclerBudget.adapter = adapter
 
-        fetchCategories()
-        fetchBudgetsAndTransactions()
 
         return view
     }
@@ -171,8 +190,6 @@ class BudgetFragment : Fragment() {
 
         adapter.updateList(filteredBudgets, transactionList, categoryMap)
     }
-
-
     private fun calculateSpentAmount(budget: Budget): Double {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val startDate = sdf.parse(budget.startDate)
@@ -186,11 +203,33 @@ class BudgetFragment : Fragment() {
                     endDate != null &&
                     transactionDate in startDate..endDate &&
                     transaction.amount < 0
-        }.sumOf { it.amount }
+        }.sumOf { it.amount }.absoluteValue
     }
 
+    /* private fun calculateSpentAmount(budget: Budget): Double {
+         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+         val startDate = sdf.parse(budget.startDate)
+         val endDate = sdf.parse(budget.endDate)
+
+         return transactionList.filter { transaction ->
+             val transactionDate = sdf.parse(transaction.date)
+             transaction.category == budget.category &&
+                     transactionDate != null &&
+                     startDate != null &&
+                     endDate != null &&
+                     transactionDate in startDate..endDate &&
+                     transaction.amount < 0
+         }.sumOf { it.amount }
+     }
+ */
     private fun handleNoBudgets() {
         // Handle the case where there are no budgets
         binding.recyclerBudget.visibility = View.GONE
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fetchCategories()
+        fetchBudgetsAndTransactions()
     }
 }

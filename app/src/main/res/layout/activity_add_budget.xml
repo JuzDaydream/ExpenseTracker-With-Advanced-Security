@@ -72,7 +72,6 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="20dp"
                 android:paddingVertical="0dp">
 
                 <Spinner
@@ -149,6 +148,10 @@
                     android:textColor="@color/white"
                     android:textColorHint="@color/whitegray"
                     android:textSize="18sp"
+                    android:clickable="false"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -185,6 +188,10 @@
                     android:textColor="@color/white"
                     android:textColorHint="@color/whitegray"
                     android:textSize="18sp"
+                    android:clickable="false"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -202,6 +209,7 @@
             android:background="@drawable/btn_white"
             android:text="Create"
             android:textAllCaps="false"
+            android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"

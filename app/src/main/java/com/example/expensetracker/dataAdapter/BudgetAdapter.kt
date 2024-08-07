@@ -1,5 +1,6 @@
 package com.example.expensetracker.dataAdapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,13 +11,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.R
 import com.example.expensetracker.data.Budget
 import com.example.expensetracker.data.Transaction
+import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.absoluteValue
 
 class BudgetAdapter(
     private val budgetList: ArrayList<Budget>,
     private val transactionList: ArrayList<Transaction>,
-    private val categoryMap: MutableMap<String, String>
+    private val categoryMap: MutableMap<String, String>,
+    private val onItemClick: (Budget) -> Unit
 ) : RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder>() {
 
     inner class BudgetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -27,6 +31,7 @@ class BudgetAdapter(
         val budgetPercent: TextView = itemView.findViewById(R.id.budget_percent)
         val budgetStartDate: TextView = itemView.findViewById(R.id.budget_startDate)
         val budgetEndDate: TextView = itemView.findViewById(R.id.budget_endDate)
+        val budgetRemain: TextView = itemView.findViewById(R.id.budget_remain)
         val budgetIcon: ImageView = itemView.findViewById(R.id.icon)
     }
 
@@ -39,14 +44,22 @@ class BudgetAdapter(
     override fun onBindViewHolder(holder: BudgetViewHolder, position: Int) {
         val budget = budgetList[position]
 
-        holder.budgetName.text = budget.category
-        holder.budgetTotal.text = "RM${budget.amount}"
+        fetchCategoryName(budget.category) { categoryName ->
+            holder.budgetName.text = categoryName ?: "Unknown Category"
+        }
+        holder.budgetTotal.text = "RM${String.format("%.2f" ,budget.amount)}"
 
         val spentAmount = calculateSpentAmount(budget)
-        holder.budgetSpentAmount.text = "RM$spentAmount"
+        holder.budgetSpentAmount.text = "RM${String.format("%.2f" ,spentAmount)}"
 
         val remainingAmount = budget.amount - spentAmount
-        holder.budgetRemainAmount.text = "RM$remainingAmount"
+
+        if (remainingAmount < 0) {
+            holder.budgetRemain.text = "Overspend"
+            holder.budgetRemainAmount.text = "RM${String.format("%.2f",remainingAmount.absoluteValue)}"
+        } else {
+            holder.budgetRemainAmount.text = "RM${String.format("%.2f" ,remainingAmount)}"
+        }
 
         val percent = if (budget.amount != 0.0) (remainingAmount / budget.amount) * 100 else 0.0
         holder.budgetPercent.text = "${percent.toInt()}%"
@@ -61,6 +74,10 @@ class BudgetAdapter(
             )
         )
 
+        // Set up the click listener
+        holder.itemView.setOnClickListener {
+            onItemClick(budget)
+        }
         // Set icon based on iconName
         val iconName = categoryMap[budget.category]
         if (iconName != null) {
@@ -90,8 +107,23 @@ class BudgetAdapter(
                     endDate != null &&
                     transactionDate in startDate..endDate &&
                     transaction.amount < 0
-        }.sumOf { it.amount }
+        }.sumOf { it.amount }.absoluteValue
     }
+
+    private fun fetchCategoryName(categoryId: String, onComplete: (String?) -> Unit) {
+        val categoryRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("Category")
+            .child(categoryId)
+
+        categoryRef.child("name").get().addOnSuccessListener { snapshot ->
+            val categoryName = snapshot.getValue(String::class.java)
+            onComplete(categoryName)
+        }.addOnFailureListener { exception ->
+            Log.e("DEBUGTEST", "Error fetching category name: ${exception.message}")
+            onComplete(null)
+        }
+    }
+
 
     fun updateList(
         newBudgets: ArrayList<Budget>,

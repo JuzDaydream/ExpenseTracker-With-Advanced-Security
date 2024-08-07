@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="150dp"
+    android:layout_height="135dp"
     android:layout_marginTop="25dp"
     android:background="@android:color/transparent">
 
@@ -51,7 +51,7 @@
                 android:layout_marginStart="15dp"
                 android:text="Budget"
                 android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@+id/img"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:text="RM500"
                 android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -74,7 +74,7 @@
                 android:layout_marginTop="10dp"
                 android:text="20/20/2020"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/img"
                 app:layout_constraintStart_toStartOf="@+id/budget_name"
                 app:layout_constraintTop_toBottomOf="@+id/budget_name" />
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:text=" - "
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="@+id/budget_startDate"
                 app:layout_constraintStart_toEndOf="@+id/budget_startDate"
                 app:layout_constraintTop_toTopOf="@+id/budget_startDate" />
@@ -96,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:text="20/20/2020"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="@+id/budget_startDate"
                 app:layout_constraintStart_toEndOf="@+id/budget_to"
                 app:layout_constraintTop_toTopOf="@+id/budget_startDate" />
@@ -108,7 +108,7 @@
                 android:layout_marginTop="10dp"
                 android:text="Spent"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/img"
                 app:layout_constraintStart_toStartOf="@+id/budget_name"
                 app:layout_constraintTop_toBottomOf="@+id/budget_startDate" />
@@ -120,9 +120,8 @@
                 android:layout_marginTop="10dp"
                 android:text="RM50"
                 android:textColor="@color/red"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="@id/budget_name"
                 app:layout_constraintTop_toBottomOf="@id/budget_spent" />
 
@@ -132,9 +131,9 @@
                 android:layout_height="wrap_content"
                 android:text="RM50"
                 android:textColor="@color/green"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/budget_spent_amount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/budget_spent_amount" />
 
@@ -145,8 +144,8 @@
                 android:layout_marginTop="10dp"
                 android:text="Left"
                 android:textColor="@color/white"
-                android:textSize="15sp"
-                app:layout_constraintStart_toStartOf="@+id/budget_remain_amount"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@+id/budget_remain_amount"
                 app:layout_constraintTop_toBottomOf="@+id/budget_startDate" />
 
             <TextView
@@ -155,9 +154,9 @@
                 android:layout_height="wrap_content"
                 android:text="50%"
                 android:textColor="@color/green"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/budget_spent_amount"
                 app:layout_constraintEnd_toStartOf="@+id/budget_remain_amount"
                 app:layout_constraintStart_toEndOf="@+id/budget_spent_amount"
                 app:layout_constraintTop_toTopOf="@+id/budget_spent_amount" />
