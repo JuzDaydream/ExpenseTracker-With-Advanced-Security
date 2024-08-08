@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".EditBudgetActivity">
+    tools:context=".EditSavingGoalActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@id/constraintLayout2"
@@ -35,7 +35,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="20dp"
             android:gravity="center"
-            android:text="Edit Budget"
+            android:text="Edit Saving Goal"
             android:textColor="@color/white"
             android:textSize="18dp"
             android:textStyle="bold"
@@ -51,8 +51,10 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2">
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2"
+        app:layout_constraintVertical_bias="1.0">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card"
@@ -72,14 +74,20 @@
                 android:layout_height="match_parent"
                 android:paddingVertical="0dp">
 
-                <Spinner
-                    android:id="@+id/spinner_category"
+                <EditText
+                    android:id="@+id/edit_title"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:paddingHorizontal="20dp"
+                    android:background="@drawable/edittext_trans_bg"
+                    android:hint="Title*"
+                    android:inputType="text"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/whitegray"
                     android:textSize="16sp"
-                    android:background="@android:color/transparent"
-                    tools:layout_editor_absoluteX="1dp"
-                    tools:layout_editor_absoluteY="20dp" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
@@ -138,7 +146,7 @@
                 android:paddingVertical="0dp">
 
                 <EditText
-                    android:id="@+id/edit_Date"
+                    android:id="@+id/edit_StartDate"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@drawable/edittext_trans_bg"
@@ -197,7 +205,90 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card5"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="24dp"
+            app:cardBackgroundColor="@color/darkgray"
+            app:cardCornerRadius="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card4">
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="0dp">
+
+                <EditText
+                    android:id="@+id/edit_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/edittext_trans_bg"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:hint="Pick an Icon*"
+                    android:inputType="text"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/whitegray"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/icon_image"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:paddingHorizontal="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="@id/edit_image"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card6"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="24dp"
+            app:cardBackgroundColor="@color/darkgray"
+            app:cardCornerRadius="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card5">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="0dp">
+
+                <EditText
+                    android:id="@+id/edit_notes"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/edittext_trans_bg"
+                    android:hint="Notes"
+                    android:inputType="text"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/whitegray"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_update"
@@ -238,12 +329,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/red"
+            android:layout_marginTop="30dp"
             android:textSize="18sp"
-            app:layout_constraintStart_toStartOf="@+id/card4"
-            app:layout_constraintTop_toBottomOf="@+id/card4" />
+            app:layout_constraintStart_toStartOf="@+id/card6"
+            app:layout_constraintTop_toBottomOf="@+id/card6" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

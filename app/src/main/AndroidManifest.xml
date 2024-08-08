@@ -24,6 +24,12 @@
         android:theme="@style/Theme.ExpenseTracker"
         tools:targetApi="31">
         <activity
+            android:name=".EditSavingGoalActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddSavingGoalActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditBudgetActivity"
             android:exported="false" />
         <activity
