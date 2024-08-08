@@ -41,7 +41,7 @@ class EditSavingGoalActivity : AppCompatActivity() {
         fetchGoal()
 
         binding.btnUpdate.setOnClickListener{
-            updateTransaction()
+            updateGoal()
         }
 
         binding.iconBack.setOnClickListener { finish() }
@@ -88,7 +88,7 @@ class EditSavingGoalActivity : AppCompatActivity() {
             Log.e("DEBUGTEST", "Error fetching goal details: ${exception.message}")
         }
     }
-    private fun updateTransaction() {
+    private fun updateGoal() {
         val title = binding.editTitle.text.toString()
         val amount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
         val startDate = binding.editStartDate.text.toString()

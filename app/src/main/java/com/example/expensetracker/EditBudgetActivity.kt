@@ -240,6 +240,7 @@ class EditBudgetActivity : AppCompatActivity() {
             .child(budgetId)
 
         val budgetData = Budget(
+            id = budgetId,
             amount = editAmount.text.toString().toDouble(),
             startDate = editDate.text.toString(),
             endDate = editEndDate.text.toString(),
