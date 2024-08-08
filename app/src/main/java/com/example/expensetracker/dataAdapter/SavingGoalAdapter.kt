@@ -46,14 +46,23 @@ class SavingGoalAdapter(
         holder.goalAmount.text = "RM${String.format("%.2f", savingGoal.amount)}"
 
         val savedAmount = calculateSavingAmount(savingGoal)
-        holder.goalSavedAmount.text = "RM${String.format("%.2f", savedAmount)}"
+        if (savedAmount>=savingGoal.amount){
+            holder.goalSavedAmount.text = "RM${String.format("%.2f", savingGoal.amount)}"
+
+        }else{
+            holder.goalSavedAmount.text = "RM${String.format("%.2f", savedAmount)}"
+        }
 
         val remainAmount = savingGoal.amount-savedAmount
-        holder.goalRemainAmount.text= "RM${String.format("%.2f", remainAmount)}"
+        if (remainAmount<=0){
+            holder.goalRemainAmount.text= "RM0.00"
+        }else{
+            holder.goalRemainAmount.text= "RM${String.format("%.2f", remainAmount)}"
+        }
 
         // Calculate percentage of goal achieved
         val goalPercent = if (savingGoal.amount > 0) {
-            (savedAmount / savingGoal.amount) * 100
+            ((savedAmount / savingGoal.amount) * 100).coerceAtMost(100.0)
         } else {
             0.0
         }
@@ -116,7 +125,7 @@ class SavingGoalAdapter(
                     transactionDate != null &&
                     startDate != null &&
                     endDate != null &&
-                    transactionDate in startDate..endDate &&
+//                    transactionDate in startDate..endDate &&
                     transaction.amount > 0
         }.sumOf { it.amount }
 

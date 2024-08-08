@@ -23,6 +23,7 @@ import java.util.Calendar
 class EditTransactionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditTransactionBinding
     private lateinit var categoryMap: Map<String, String>
+    private lateinit var goalMap: Map<String, String>
     private lateinit var userID: String
     private lateinit var transactionId: String
 
@@ -62,57 +63,97 @@ class EditTransactionActivity : AppCompatActivity() {
     }
 
     private fun fetchCategories() {
-        val categoriesRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("Category")
-        categoriesRef.get().addOnSuccessListener { snapshot ->
-            categoryMap = snapshot.children.associate {
+        val database = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+        val categoriesRef = database.getReference("Category")
+        val goalRef = database.getReference("SavingGoal")
+
+        // Fetch categories
+        categoriesRef.get().addOnSuccessListener { categorySnapshot ->
+            categoryMap = categorySnapshot.children.associate {
                 it.key!! to it.child("name").getValue(String::class.java)!!
             }
 
-            val categoryNames = listOf("Select Category") + categoryMap.values.toList()
-            val categoryIds = listOf("") + categoryMap.keys.toList()
+            // Fetch saving goals
+            goalRef.get().addOnSuccessListener { goalSnapshot ->
+                goalMap = goalSnapshot.children.associate {
+                    it.key!! to it.child("title").getValue(String::class.java)!!
+                }
 
-            val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
-            adapter.setDropDownViewResource(R.layout.spinner_category)
-            binding.spinnerCategory.adapter = adapter
+                // Combine category and saving goal data
+                val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
+                val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
 
-            binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                    if (position == 0) {
-                        selectedCategoryId = null
-                    } else {
-                        selectedCategoryId = categoryIds[position]
+                // Set up the spinner adapter
+                val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
+                adapter.setDropDownViewResource(R.layout.spinner_category)
+                binding.spinnerCategory.adapter = adapter
+
+                binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                        selectedCategoryId = if (position == 0) null else categoryIds[position]
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>) {
+                        // Do nothing
                     }
                 }
-
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                    // Do nothing
-                }
+            }.addOnFailureListener { exception ->
+                Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
             }
         }.addOnFailureListener { exception ->
             Log.e("DEBUGTEST", "Error fetching categories: ${exception.message}")
         }
     }
 
+
+
     private fun fetchTransactionDetails() {
-        val transRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("Transaction").child(transactionId)
+        val transRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("Transaction")
+            .child(transactionId)
+
         transRef.get().addOnSuccessListener { snapshot ->
             val transaction = snapshot.getValue(Transaction::class.java)
             if (transaction != null) {
                 binding.editTitle.setText(transaction.title)
-                binding.editAmount.setText(String.format("%.2f" ,transaction.amount))
+                binding.editAmount.setText(String.format("%.2f", transaction.amount))
                 binding.editDate.setText(transaction.date)
                 binding.editNotes.setText(transaction.note)
                 selectedCategoryId = transaction.category
 
-                val categoryNames = listOf("Select Category") + categoryMap.values.toList()
-                val categoryIds = listOf("") + categoryMap.keys.toList()
-                val categoryIndex = categoryIds.indexOf(selectedCategoryId)
-                binding.spinnerCategory.setSelection(categoryIndex)
+                // Fetch goalMap and then update the spinner
+                fetchGoalsAndUpdateSpinner()
             } else {
                 Log.e("DEBUGTEST", "Transaction not found")
             }
         }.addOnFailureListener { exception ->
             Log.e("DEBUGTEST", "Error fetching transaction details: ${exception.message}")
+        }
+    }
+
+    private fun fetchGoalsAndUpdateSpinner() {
+        val database = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+        val goalRef = database.getReference("SavingGoal")
+
+        goalRef.get().addOnSuccessListener { goalSnapshot ->
+            goalMap = goalSnapshot.children.associate {
+                it.key!! to it.child("title").getValue(String::class.java)!!
+            }
+
+            // Update the spinner with both category and goal data
+            val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
+            val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
+            val categoryIndex = categoryIds.indexOf(selectedCategoryId)
+
+            // Set up the spinner adapter
+            val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
+            adapter.setDropDownViewResource(R.layout.spinner_category)
+            binding.spinnerCategory.adapter = adapter
+
+            // Set the spinner selection
+            binding.spinnerCategory.setSelection(categoryIndex)
+        }.addOnFailureListener { exception ->
+            Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
         }
     }
 

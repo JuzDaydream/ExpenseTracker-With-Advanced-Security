@@ -95,7 +95,7 @@ class EditBudgetActivity : AppCompatActivity() {
             this,
             { _, selectedYear, selectedMonth, selectedDay ->
                 calendar.set(selectedYear, selectedMonth, selectedDay)
-                val formattedDate = "${selectedDay}/${selectedMonth + 1}/${selectedYear}"
+                val formattedDate = String.format("%02d/%02d/%04d", selectedDay,selectedMonth + 1,selectedYear)
                 editText.setText(formattedDate)
                 if (!isStartDate && endDate.timeInMillis < startDate.timeInMillis) {
                     editEndDate.error = "End date cannot be before start date."

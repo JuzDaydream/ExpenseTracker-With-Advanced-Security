@@ -16,6 +16,7 @@ import java.util.Calendar
 class AddTransactionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddTransactionBinding
     private lateinit var categoryMap: Map<String, String>
+    private lateinit var goalMap: Map<String, String>
     private lateinit var userID: String
 
     private var selectedCategoryId: String? = null // To store the selected category ID
@@ -43,32 +44,42 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun fetchCategories() {
-        val categoriesRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("Category")
-        categoriesRef.get().addOnSuccessListener { snapshot ->
-            categoryMap = snapshot.children.associate {
+        val database = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+        val categoriesRef = database.getReference("Category")
+        val goalRef = database.getReference("SavingGoal")
+
+        // Fetch categories
+        categoriesRef.get().addOnSuccessListener { categorySnapshot ->
+            categoryMap = categorySnapshot.children.associate {
                 it.key!! to it.child("name").getValue(String::class.java)!!
             }
 
-            // Add "Select Category" at the beginning of the lists
-            val categoryNames = listOf("Select Category") + categoryMap.values.toList()
-            val categoryIds = listOf("") + categoryMap.keys.toList()
+            // Fetch saving goals
+            goalRef.get().addOnSuccessListener { goalSnapshot ->
+                goalMap = goalSnapshot.children.associate {
+                    it.key!! to it.child("title").getValue(String::class.java)!!
+                }
 
-            val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
-            adapter.setDropDownViewResource(R.layout.spinner_category)
-            binding.spinnerCategory.adapter = adapter
+                // Combine category and saving goal data
+                val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
+                val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
 
-            binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                    if (position == 0) {
-                        selectedCategoryId = null
-                    } else {
-                        selectedCategoryId = categoryIds[position]
+                // Set up the spinner adapter
+                val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
+                adapter.setDropDownViewResource(R.layout.spinner_category)
+                binding.spinnerCategory.adapter = adapter
+
+                binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                        selectedCategoryId = if (position == 0) null else categoryIds[position]
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>) {
+                        // Do nothing
                     }
                 }
-
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                    // Do nothing
-                }
+            }.addOnFailureListener { exception ->
+                Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
             }
         }.addOnFailureListener { exception ->
             Log.e("DEBUGTEST", "Error fetching categories: ${exception.message}")

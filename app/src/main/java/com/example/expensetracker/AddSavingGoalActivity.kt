@@ -156,7 +156,7 @@ class AddSavingGoalActivity : AppCompatActivity() {
             { _, selectedYear, selectedMonth, selectedDay ->
                 calendar.set(selectedYear, selectedMonth, selectedDay)
 
-                val formattedDate = "${selectedDay}/${selectedMonth + 1}/${selectedYear}"
+                val formattedDate = String.format("%02d/%02d/%04d", selectedDay,selectedMonth + 1,selectedYear)
                 editText.setText(formattedDate)
 
                 if (!isStartDate) {

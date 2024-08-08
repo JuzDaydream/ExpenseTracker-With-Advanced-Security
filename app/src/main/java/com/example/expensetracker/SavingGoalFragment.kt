@@ -129,6 +129,8 @@ class SavingGoalFragment : Fragment() {
                     }
                     completedListeners++
                     if (completedListeners == savingGoalIds.size) {
+                        // Sort the list before updating the adapter
+                        sortSavingGoalsByStartDate()
                         fetchTransactionsForSavingGoal()
                     }
                 }
@@ -137,6 +139,15 @@ class SavingGoalFragment : Fragment() {
                     Log.e("SavingGoalFragment", "Database error: ${error.message}")
                 }
             })
+        }
+    }
+
+    private fun sortSavingGoalsByStartDate() {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        savingGoalList.sortWith { goal1, goal2 ->
+            val date1 = sdf.parse(goal1.startDate)
+            val date2 = sdf.parse(goal2.startDate)
+            date1?.compareTo(date2) ?: 0
         }
     }
 
