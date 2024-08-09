@@ -6,8 +6,10 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.*
@@ -24,8 +26,13 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.*
 import android.view.View
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.FileProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.example.expensetracker.data.Transaction
+
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
 
 class ScanReceiptActivity : AppCompatActivity() {
 
@@ -43,7 +50,10 @@ class ScanReceiptActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan_receipt)
 
-        userID = intent.getStringExtra("userID").toString()
+        //userID = intent.getStringExtra("userID").toString()
+        userID = intent.getStringExtra("userID") ?: ""
+        Log.d("DEBUGTEST", "Intent Extras: ${intent.extras}")
+
         Log.d("DEBUGTEST", "UserID: $userID")
         btnCreate = findViewById(R.id.btn_create)
         imgResult = findViewById(R.id.imageView2)
@@ -227,35 +237,72 @@ class ScanReceiptActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun openCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        captureImageResultLauncher.launch(cameraIntent)
-    }
-
-    private fun openGallery() {
-        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        selectImageResultLauncher.launch(galleryIntent)
-    }
-
     private val captureImageResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultData ->
-            if (resultData.resultCode == Activity.RESULT_OK && resultData.data != null) {
-                val imageBitmap = resultData.data?.extras?.get("data") as Bitmap
-                imgResult.setImageBitmap(imageBitmap)
-                processImage(imageBitmap)
+            if (resultData.resultCode == Activity.RESULT_OK) {
+                // Use the imageUri set earlier to decode the image
+                val imageUri = currentPhotoUri
+                imgResult.setImageURI(imageUri)
+                val bitmap = BitmapFactory.decodeFile(currentPhotoFile?.absolutePath)
+                processImage(bitmap)
             }
         }
+
+    private var currentPhotoFile: File? = null
+    private var currentPhotoUri: Uri? = null
+
+    private fun openCamera() {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        currentPhotoFile = createImageFile()
+        currentPhotoFile?.also {
+            val uri = FileProvider.getUriForFile(this, "${this.packageName}.provider", it)
+            currentPhotoUri = uri
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            captureImageResultLauncher.launch(cameraIntent)
+        } ?: Log.e("ScanReceipt", "Failed to create image file")
+    }
+
+    private fun createImageFile(): File? {
+        return try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val imageFileName = "JPEG_${timestamp}_"
+            val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            File.createTempFile(imageFileName, ".jpg", storageDir)
+        } catch (e: IOException) {
+            Log.e("ScanReceipt", "Error creating image file", e)
+            null
+        }
+    }
+
+
+    private fun getBitmapFromUri(uri: Uri): Bitmap {
+        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+        return bitmap
+    }
+
 
     private val selectImageResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultData ->
             if (resultData.resultCode == Activity.RESULT_OK && resultData.data != null) {
                 val imageUri = resultData.data?.data
                 imageUri?.let {
-                    imgResult.setImageURI(it)
-                    processImageUri(it)
+                    val bitmap = getBitmapFromUri(it)
+                    imgResult.setImageBitmap(bitmap)
+                    processImage(bitmap)
                 }
             }
         }
+
+
+    private fun openGallery() {
+        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        selectImageResultLauncher.launch(galleryIntent)
+    }
+
+
+
+
+
 
     private fun processImage(imageBitmap: Bitmap) {
         val image = InputImage.fromBitmap(imageBitmap, 0)
@@ -269,8 +316,8 @@ class ScanReceiptActivity : AppCompatActivity() {
             }
     }
 
-    private fun processImageUri(imageUri: Uri) {
-        val image = InputImage.fromFilePath(this, imageUri)
+    private fun processImageUri(imageBitmap: Bitmap) {
+        val image = InputImage.fromBitmap(imageBitmap, 0)
         textRecognizer.process(image)
             .addOnSuccessListener { visionText ->
                 parseExtractedText(visionText.text)
@@ -294,14 +341,11 @@ class ScanReceiptActivity : AppCompatActivity() {
         editAmount.setText(amount ?: "")
         editDate.setText(date ?: "")
 
-        /*  textView.text = """
-              Merchant Name: ${merchantName ?: "Not found"}
-              Total Amount: ${amount ?: "Not found"}
-              Date: ${date ?: "Not found"}
-          """.trimIndent()*/
+
 
         Toast.makeText(this, "Information extraction completed.", Toast.LENGTH_SHORT).show()
     }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

@@ -283,7 +283,7 @@ class TransactionFragment : Fragment() {
         }
         cardScan.setOnClickListener {
             val intent = Intent(requireContext(), ScanReceiptActivity::class.java)
-            intent.putExtra("UserID", userID)
+            intent.putExtra("userID", userID)
             startActivity(intent)
             dialog.dismiss()
         }
