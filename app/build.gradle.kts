@@ -72,4 +72,7 @@ dependencies {
     implementation ("com.google.android.gms:play-services-cast-framework:21.5.0")
     implementation ("androidx.activity:activity-ktx:1.2.3")
     implementation ("androidx.fragment:fragment-ktx:1.3.3")
+
+
+    implementation ("com.rmtheis:tess-two:9.1.0")
 }

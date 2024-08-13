@@ -24,6 +24,9 @@
         android:theme="@style/Theme.ExpenseTracker"
         tools:targetApi="31">
         <activity
+            android:name=".SpendingAnalysisActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditSavingGoalActivity"
             android:exported="false" />
         <activity
@@ -62,6 +65,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

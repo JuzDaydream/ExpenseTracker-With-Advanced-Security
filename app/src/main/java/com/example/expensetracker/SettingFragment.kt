@@ -28,6 +28,13 @@ class SettingFragment : Fragment() {
             startActivity(intent)
             requireActivity().finish()
         }
+        binding.cardCreateSpending.setOnClickListener {
+            val intent = Intent(requireContext(), SpendingAnalysisActivity::class.java)
+            val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val userId = sharedPreferences.getString("userID", "")
+            intent.putExtra("userID", userId)
+            startActivity(intent)
+        }
 
         binding.cardCategory.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().replace(R.id.fragmentContainerView2, CategoryFragment()).addToBackStack(null).commit()
