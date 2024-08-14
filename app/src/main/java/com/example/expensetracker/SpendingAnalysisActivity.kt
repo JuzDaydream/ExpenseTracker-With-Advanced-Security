@@ -1,7 +1,6 @@
 package com.example.expensetracker
 
 import android.app.DatePickerDialog
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -13,14 +12,10 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.expensetracker.data.Transaction
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import com.googlecode.tesseract.android.TessBaseAPI;
 
 class SpendingAnalysisActivity : AppCompatActivity() {
     private lateinit var btnCreate: AppCompatButton
@@ -66,7 +61,7 @@ class SpendingAnalysisActivity : AppCompatActivity() {
             val startDate = editDate.text.toString()
             val endDate = editEndDate.text.toString()
 
-            val intent = Intent(this, SpendingAnalysisCreated::class.java)
+//            val intent = Intent(this, SpendingAnalysisCreated::class.java)
             intent.putExtra("userID", userId)
             intent.putExtra("startDate", startDate)
             intent.putExtra("endDate", endDate)
