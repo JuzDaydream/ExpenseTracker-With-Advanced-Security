@@ -60,7 +60,9 @@ class StatAdapter(
     override fun getItemCount(): Int {
         return groupedTransactions.size
     }
-
+    fun getGroupedTransactions(): List<Pair<String, Double>> {
+        return groupedTransactions
+    }
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val icon: ImageView = itemView.findViewById(R.id.icon)
         val stat_name: TextView = itemView.findViewById(R.id.stat_name)

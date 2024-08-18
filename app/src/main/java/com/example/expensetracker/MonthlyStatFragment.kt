@@ -1,5 +1,11 @@
 package com.example.expensetracker.ui
 
+//import com.anychart.AnyChart.pie
+//import com.anychart.AnyChartView
+//import com.anychart.chart.common.dataentry.DataEntry
+//import com.anychart.chart.common.dataentry.ValueDataEntry
+//import com.anychart.enums.LegendLayout
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +23,11 @@ import com.example.expensetracker.R
 import com.example.expensetracker.data.Category
 import com.example.expensetracker.data.Transaction
 import com.example.expensetracker.dataAdapter.StatAdapter
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -32,6 +43,8 @@ class MonthlyStatFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvTotalAmount: TextView
     private lateinit var spinner: Spinner
+//    private lateinit var chart: AnyChartView
+    private lateinit var chart: PieChart
     private lateinit var databaseReference: DatabaseReference
     private lateinit var userID: String // Add userID
     private var categoryMap: MutableMap<String, String> = mutableMapOf()
@@ -48,7 +61,7 @@ class MonthlyStatFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recycler_stat)
         tvTotalAmount = view.findViewById(R.id.tv_amount)
         spinner = view.findViewById(R.id.spinner_month_year)
-
+        chart  = view.findViewById(R.id.chart)
         statAdapter = StatAdapter(ArrayList(), categoryMap)
         recyclerView.adapter = statAdapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -171,6 +184,8 @@ class MonthlyStatFragment : Fragment() {
         tvTotalAmount.text = formattedAmount
 
         statAdapter.updateList(filteredTransactions)
+        val groupedTransactions = statAdapter.getGroupedTransactions()
+        updatePieChart(groupedTransactions, categoryMap)
     }
 
     private fun isInSelectedMonth(date: String): Boolean {
@@ -191,6 +206,9 @@ class MonthlyStatFragment : Fragment() {
 
         val updatedSpinnerAdapter = ArrayAdapter(requireContext(), R.layout.spinner_month, R.id.text1, monthYearList)
         updatedSpinnerAdapter.setDropDownViewResource(R.layout.spinner_month)
+        tvTotalAmount.text = "RM0.00"
+        statAdapter.updateList(emptyList())
+        updatePieChart(emptyList(), categoryMap)
     }
 
     private fun setupSpinner() {
@@ -235,4 +253,71 @@ class MonthlyStatFragment : Fragment() {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return dateFormat.parse(date) ?: Date()
     }
+
+    //chart
+
+        private fun updatePieChart(groupedTransactions: List<Pair<String, Double>>, categoryMap: Map<String, String>) {
+            val pieChart = view?.findViewById<PieChart>(R.id.chart) ?: return
+
+            // Prepare data for the pie chart
+            val entries = ArrayList<PieEntry>()
+            for ((category, totalAmount) in groupedTransactions) {
+                val categoryName = categoryMap[category] ?: "Unknown"
+                entries.add(PieEntry(Math.abs(totalAmount).toFloat(), categoryName))
+            }
+
+            // Create a dataset and set its properties
+            val dataSet = PieDataSet(entries, "Category")
+
+            dataSet.setColors(ColorTemplate.JOYFUL_COLORS ,255)
+            dataSet.valueTextColor = Color.parseColor("#FCFCFD")
+            dataSet.valueTextSize = 14f
+
+            // Create PieData and set it to the chart
+            val pieData = PieData(dataSet)
+            pieChart.data = pieData
+
+            // Customize pie chart appearance
+            pieChart.description.isEnabled = false
+
+            pieChart.setBackgroundColor(Color.parseColor("#222222"))
+//            pieChart.legend.position = com.github.mikephil.charting.components.Legend.LegendPosition.RIGHT_OF_CHART
+            pieChart.legend.orientation = com.github.mikephil.charting.components.Legend.LegendOrientation.VERTICAL
+            pieChart.legend.textColor=Color.parseColor("#FCFCFD")
+            pieChart.legend.textSize=(14f)
+            pieChart.setDrawHoleEnabled(true)
+            pieChart.holeRadius = 65f
+            pieChart.setHoleColor(Color.TRANSPARENT)
+            pieChart.setEntryLabelColor(Color.parseColor("#FCFCFD"))
+            pieChart.setEntryLabelTextSize(14f) // Set text size for labels
+
+
+            // Refresh chart
+            pieChart.invalidate()
+    }
+
+//    private fun updatePieChart(groupedTransactions: List<Pair<String, Double>>, categoryMap: Map<String, String>) {
+//        val pie = pie()
+//        Log.d("MonthlyStatFragment", "Filtered Transactions: $groupedTransactions")
+//        Log.d("MonthlyStatFragment", "Selected Month: $selectedMonth")
+//        // Prepare data for the pie chart
+//        val data: MutableList<DataEntry> = ArrayList()
+//        for ((category, totalAmount) in groupedTransactions) {
+//            val categoryName = categoryMap[category] ?: "Unknown"
+//            data.add(ValueDataEntry(categoryName, Math.abs(totalAmount)))
+//        }
+//
+//        pie.data(data)
+//
+//        // Customize pie chart (optional)
+//        pie.title(false)
+//        pie.labels().position("inside")
+//        pie.background().fill("#222222")
+//        pie.legend().position("right")
+//        pie.legend().itemsLayout(LegendLayout.VERTICAL)
+//        pie.innerRadius("40%")
+//        // Set the chart to the AnyChartView
+//        chart.invalidate()
+//        chart.setChart(pie)
+//    }
 }

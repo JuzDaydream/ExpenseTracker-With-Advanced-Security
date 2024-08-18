@@ -14,7 +14,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
+        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 
@@ -75,4 +75,8 @@ dependencies {
 
 
     implementation ("com.rmtheis:tess-two:9.1.0")
+
+//chart
+//    implementation ("com.github.AnyChart:AnyChart-Android:1.1.2")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }
