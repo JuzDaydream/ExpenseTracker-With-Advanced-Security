@@ -27,6 +27,7 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -272,7 +273,11 @@ class MonthlyStatFragment : Fragment() {
             dataSet.setColors(ColorTemplate.JOYFUL_COLORS ,255)
             dataSet.valueTextColor = Color.parseColor("#FCFCFD")
             dataSet.valueTextSize = 14f
-
+            dataSet.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return String.format("RM%.2f", value)  // Ensure two decimal places
+                }
+            }
             // Create PieData and set it to the chart
             val pieData = PieData(dataSet)
             pieChart.data = pieData
@@ -286,7 +291,7 @@ class MonthlyStatFragment : Fragment() {
             pieChart.legend.textColor=Color.parseColor("#FCFCFD")
             pieChart.legend.textSize=(14f)
             pieChart.setDrawHoleEnabled(true)
-            pieChart.holeRadius = 65f
+            pieChart.holeRadius = 55f
             pieChart.setHoleColor(Color.TRANSPARENT)
             pieChart.setEntryLabelColor(Color.parseColor("#FCFCFD"))
             pieChart.setEntryLabelTextSize(14f) // Set text size for labels

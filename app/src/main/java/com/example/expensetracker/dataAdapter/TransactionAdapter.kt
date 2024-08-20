@@ -1,5 +1,6 @@
 package com.example.expensetracker.dataAdapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +31,9 @@ class TransactionAdapter(
         val context = holder.itemView.context
         val resourceId = context.resources.getIdentifier(iconName ?: "", "drawable", context.packageName)
         holder.icon.setImageResource(if (resourceId != 0) resourceId else R.drawable.icon_money)
-
+        Log.d("StatAdapter", "Category: "+currentItem.category)
+        Log.d("StatAdapter", "Icon Name: $iconName")
+        Log.d("StatAdapter", "Resource ID: $resourceId")
         // Set the amount and color
         holder.trans_amount.text = String.format(
             if (currentItem.amount > 0) "+RM%.2f" else "-RM%.2f",

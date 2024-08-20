@@ -36,14 +36,23 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingVertical="25dp">
+            android:padding="15dp">
 
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <!--<com.anychart.AnyChartView-->
+            <!--    android:id="@+id/chart"-->
+            <!--    android:layout_width="match_parent"-->
+            <!--    android:layout_height="match_parent"/>-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
     <Spinner
-        android:id="@+id/spinner_month_year"
+        android:id="@+id/spinner_year"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
@@ -61,7 +70,7 @@
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner_month_year" />
+        app:layout_constraintTop_toBottomOf="@+id/spinner_year" />
 
     <TextView
         android:id="@+id/tv_amount"
@@ -74,6 +83,6 @@
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner_month_year" />
+        app:layout_constraintTop_toBottomOf="@+id/spinner_year" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

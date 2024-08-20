@@ -1,5 +1,6 @@
 package com.example.expensetracker.dataAdapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.R
 import com.example.expensetracker.data.Transaction
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class StatAdapter(
     private var transactionList: List<Transaction>,
@@ -43,18 +48,41 @@ class StatAdapter(
         val (category, totalAmountCategory) = groupedTransactions[position]
 
         // Fetch the iconName using the categoryId
-        val iconName = categoryMap[category]
-        val context = holder.itemView.context
-        val resourceId = context.resources.getIdentifier(iconName ?: "", "drawable", context.packageName)
-        holder.icon.setImageResource(if (resourceId != 0) resourceId else R.drawable.icon_money)
+//        for (i=0;i<transactionList.size;i++){
+//
+//        }
+        // Fetch the iconName using the categoryId from Firebase
+        val database =
+            FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+        val categoryRef = database.getReference("Category").child(category)
 
-        // Set category name and total amount
-        holder.stat_name.text = categoryMap[category] ?: "Unknown"
-        holder.stat_amount.text = String.format("RM%.2f", Math.abs(totalAmountCategory))
+        categoryRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val iconName = snapshot.child("icon").getValue(String::class.java)
+                val context = holder.itemView.context
+                val resourceId =
+                    context.resources.getIdentifier(iconName ?: "", "drawable", context.packageName)
+                holder.icon.setImageResource(if (resourceId != 0) resourceId else R.drawable.icon_money)
 
-        // Calculate and set the percentage
-        val percentage = if (totalAmount != 0.0) (totalAmountCategory / totalAmount) * 100 else 0.0
-        holder.stat_percent.text = String.format("%.2f%%", percentage)
+                // Set category name and total amount
+                holder.stat_name.text = categoryMap[category] ?: "Unknown"
+                holder.stat_amount.text = String.format("RM%.2f", Math.abs(totalAmountCategory))
+
+                // Calculate and set the percentage
+                val percentage =
+                    if (totalAmount != 0.0) (totalAmountCategory / totalAmount) * 100 else 0.0
+                holder.stat_percent.text = String.format("%.2f%%", percentage)
+
+                Log.d("StatAdapter", "Category: $category")
+                Log.d("StatAdapter", "Icon Name: $iconName")
+                Log.d("StatAdapter", "Resource ID: $resourceId")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle possible errors
+                holder.icon.setImageResource(R.drawable.icon_money)
+            }
+        })
     }
 
     override fun getItemCount(): Int {
