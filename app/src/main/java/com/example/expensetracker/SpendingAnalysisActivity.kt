@@ -1,6 +1,7 @@
 package com.example.expensetracker
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -61,7 +62,7 @@ class SpendingAnalysisActivity : AppCompatActivity() {
             val startDate = editDate.text.toString()
             val endDate = editEndDate.text.toString()
 
-//            val intent = Intent(this, SpendingAnalysisCreated::class.java)
+            val intent = Intent(this, SpendingAnalysisCreatedActivity::class.java)
             intent.putExtra("userID", userId)
             intent.putExtra("startDate", startDate)
             intent.putExtra("endDate", endDate)

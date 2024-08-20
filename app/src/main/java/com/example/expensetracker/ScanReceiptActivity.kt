@@ -12,29 +12,35 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.*
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import com.example.expensetracker.data.Transaction
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.FirebaseDatabase
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import java.util.*
-import android.view.View
-import androidx.appcompat.widget.AppCompatButton
-import androidx.core.content.FileProvider
-import com.google.firebase.database.FirebaseDatabase
-import com.example.expensetracker.data.Transaction
-
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
-class ScanReceiptActivity : AppCompatActivity() {
+class ScanReceipt : AppCompatActivity() {
 
     private lateinit var imgResult: ImageView
     private lateinit var editTitle: EditText
@@ -50,14 +56,13 @@ class ScanReceiptActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan_receipt)
 
-        //userID = intent.getStringExtra("userID").toString()
+
         userID = intent.getStringExtra("userID") ?: ""
         Log.d("DEBUGTEST", "Intent Extras: ${intent.extras}")
 
         Log.d("DEBUGTEST", "UserID: $userID")
         btnCreate = findViewById(R.id.btn_create)
         imgResult = findViewById(R.id.imageView2)
-        // textView = findViewById(R.id.tv_result)
         editTitle = findViewById(R.id.edit_title)
         editAmount = findViewById(R.id.edit_amount)
         editDate = findViewById(R.id.edit_Date)
@@ -85,8 +90,6 @@ class ScanReceiptActivity : AppCompatActivity() {
                 saveTransaction(newId)
             }
         }
-
-
 
         // Set OnClickListener for editDate to show DatePickerDialog
         editDate.setOnClickListener {
@@ -308,44 +311,55 @@ class ScanReceiptActivity : AppCompatActivity() {
         val image = InputImage.fromBitmap(imageBitmap, 0)
         textRecognizer.process(image)
             .addOnSuccessListener { visionText ->
-                parseExtractedText(visionText.text)
+                val resultText = visionText.text
+                Log.d("DEBUGTEST", "Extracted text: $resultText")
+
+                var merchantName: String? = null
+                var date: String? = null
+                var totalAmount: String? = null
+
+                val lines = resultText.split("\n")
+                for (line in lines) {
+                    // Extract date
+                    if (date == null) {
+                        val dateRegex = Regex("\\d{1,2}/\\d{1,2}/\\d{4}")
+                        val matchResult = dateRegex.find(line)
+                        if (matchResult != null) {
+                            date = matchResult.value
+                            editDate.setText(date)
+                        }
+                    }
+
+                    // Extract total amount
+                    if (totalAmount == null && line.contains("Total", ignoreCase = true)) {
+                        val amountRegex = Regex("\\d+(\\.\\d{2})?")
+                        val matchResult = amountRegex.findAll(line)
+                        matchResult.lastOrNull()?.let {
+                            totalAmount = it.value
+                            editAmount.setText(totalAmount)
+                        }
+                    }
+
+                    // Extract merchant name (heuristic approach)
+                    if (merchantName == null) {
+                        val merchantNameRegex = Regex("[A-Za-z\\s]{5,}") // Assuming merchant names have 5 or more letters
+                        val matchResult = merchantNameRegex.find(line)
+                        if (matchResult != null && !line.contains("Invoice", ignoreCase = true)) {
+                            merchantName = matchResult.value.trim()
+                            editTitle.setText(merchantName)
+                        }
+                    }
+                }
+
+                // Log or handle cases where extraction failed
+                if (date == null) Log.d("DEBUGTEST", "Date not found.")
+                if (totalAmount == null) Log.d("DEBUGTEST", "Total amount not found.")
+                if (merchantName == null) Log.d("DEBUGTEST", "Merchant name not found.")
             }
             .addOnFailureListener { e ->
-                e.printStackTrace()
-                Toast.makeText(this, "Text recognition failed.", Toast.LENGTH_SHORT).show()
+                Log.e("DEBUGTEST", "Error processing image: ${e.message}", e)
             }
     }
-
-    private fun processImageUri(imageBitmap: Bitmap) {
-        val image = InputImage.fromBitmap(imageBitmap, 0)
-        textRecognizer.process(image)
-            .addOnSuccessListener { visionText ->
-                parseExtractedText(visionText.text)
-            }
-            .addOnFailureListener { e ->
-                e.printStackTrace()
-                Toast.makeText(this, "Text recognition failed.", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun parseExtractedText(resultText: String) {
-        val merchantNamePattern = Regex("Merchant: (.+)")
-        val amountPattern = Regex("Total: (\\d+\\.\\d{2})")
-        val datePattern = Regex("\\d{2}/\\d{2}/\\d{4}")
-
-        val merchantName = merchantNamePattern.find(resultText)?.groupValues?.get(1)
-        val amount = amountPattern.find(resultText)?.groupValues?.get(1)
-        val date = datePattern.find(resultText)?.value
-
-        editTitle.setText(merchantName ?: "")
-        editAmount.setText(amount ?: "")
-        editDate.setText(date ?: "")
-
-
-
-        Toast.makeText(this, "Information extraction completed.", Toast.LENGTH_SHORT).show()
-    }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
