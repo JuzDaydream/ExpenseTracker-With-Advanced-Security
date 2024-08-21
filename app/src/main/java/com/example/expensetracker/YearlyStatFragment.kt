@@ -230,8 +230,13 @@ class YearlyStatFragment : Fragment() {
     }
 
     private fun parseDate(date: String): Date {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        return dateFormat.parse(date) ?: Date()
+        return try {
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            dateFormat.parse(date) ?: Date()
+        } catch (e: Exception) {
+            Log.e("YearlyStatFragment", "Failed to parse date: $date", e)
+            Date() // Return a default date or handle the error appropriately
+        }
     }
 
     private fun updatePieChart(groupedTransactions: List<Pair<String, Double>>, categoryMap: Map<String, String>) {

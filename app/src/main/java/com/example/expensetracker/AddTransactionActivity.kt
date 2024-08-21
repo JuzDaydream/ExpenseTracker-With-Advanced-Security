@@ -2,7 +2,6 @@ package com.example.expensetracker
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -47,42 +46,57 @@ class AddTransactionActivity : AppCompatActivity() {
         val database = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
         val categoriesRef = database.getReference("Category")
         val goalRef = database.getReference("SavingGoal")
+        val userRef = database.getReference("User").child(userID).child("goalList")
 
-        // Fetch categories
-        categoriesRef.get().addOnSuccessListener { categorySnapshot ->
-            categoryMap = categorySnapshot.children.associate {
-                it.key!! to it.child("name").getValue(String::class.java)!!
+        // Fetch user's goalList
+        userRef.get().addOnSuccessListener { userSnapshot ->
+            val userGoalIds = mutableListOf<String>()
+            for (goalSnapshot in userSnapshot.children) {
+                val goalId = goalSnapshot.getValue(String::class.java)
+                goalId?.let { userGoalIds.add(it) }
             }
 
-            // Fetch saving goals
-            goalRef.get().addOnSuccessListener { goalSnapshot ->
-                goalMap = goalSnapshot.children.associate {
-                    it.key!! to it.child("title").getValue(String::class.java)!!
+            // Fetch categories
+            categoriesRef.get().addOnSuccessListener { categorySnapshot ->
+                categoryMap = categorySnapshot.children.associate {
+                    it.key!! to it.child("name").getValue(String::class.java)!!
                 }
 
-                // Combine category and saving goal data
-                val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
-                val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
-
-                // Set up the spinner adapter
-                val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
-                adapter.setDropDownViewResource(R.layout.spinner_category)
-                binding.spinnerCategory.adapter = adapter
-
-                binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                        selectedCategoryId = if (position == 0) null else categoryIds[position]
+                // Fetch saving goals
+                goalRef.get().addOnSuccessListener { goalSnapshot ->
+                    // Filter the saving goals to only include those in the user's goalList
+                    goalMap = goalSnapshot.children.filter {
+                        userGoalIds.contains(it.key)
+                    }.associate {
+                        it.key!! to it.child("title").getValue(String::class.java)!!
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>) {
-                        // Do nothing
+                    // Combine category and filtered saving goal data
+                    val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
+                    val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
+
+                    // Set up the spinner adapter
+                    val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
+                    adapter.setDropDownViewResource(R.layout.spinner_category)
+                    binding.spinnerCategory.adapter = adapter
+
+                    binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                            selectedCategoryId = if (position == 0) null else categoryIds[position]
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {
+                            // Do nothing
+                        }
                     }
+                }.addOnFailureListener { exception ->
+                    Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
                 }
             }.addOnFailureListener { exception ->
-                Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
+                Log.e("DEBUGTEST", "Error fetching categories: ${exception.message}")
             }
         }.addOnFailureListener { exception ->
-            Log.e("DEBUGTEST", "Error fetching categories: ${exception.message}")
+            Log.e("DEBUGTEST", "Error fetching user goals: ${exception.message}")
         }
     }
 

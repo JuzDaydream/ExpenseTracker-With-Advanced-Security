@@ -251,8 +251,13 @@ class MonthlyStatFragment : Fragment() {
     }
 
     private fun parseDate(date: String): Date {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        return dateFormat.parse(date) ?: Date()
+        return try {
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            dateFormat.parse(date) ?: Date()
+        } catch (e: Exception) {
+            Log.e("MonthlyStatFragment", "Failed to parse date: $date", e)
+            Date() // Return a default date or handle the error appropriately
+        }
     }
 
     //chart
