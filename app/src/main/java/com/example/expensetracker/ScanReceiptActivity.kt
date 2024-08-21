@@ -40,7 +40,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class ScanReceipt : AppCompatActivity() {
+class ScanReceiptActivity : AppCompatActivity() {
 
     private lateinit var imgResult: ImageView
     private lateinit var editTitle: EditText
