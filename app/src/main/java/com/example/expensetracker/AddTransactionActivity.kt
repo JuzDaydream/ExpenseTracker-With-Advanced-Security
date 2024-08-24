@@ -17,6 +17,7 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var categoryMap: Map<String, String>
     private lateinit var goalMap: Map<String, String>
     private lateinit var userID: String
+    private lateinit var transType: String
 
     private var selectedCategoryId: String? = null // To store the selected category ID
 
@@ -25,6 +26,7 @@ class AddTransactionActivity : AppCompatActivity() {
         binding = ActivityAddTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
         userID = intent.getStringExtra("userID").toString()
+        transType = intent.getStringExtra("transType").toString()
         Log.d("DEBUGTEST", "UserID: $userID")
         binding.iconBack.setOnClickListener { finish() }
         fetchCategories()
@@ -58,45 +60,71 @@ class AddTransactionActivity : AppCompatActivity() {
 
             // Fetch categories
             categoriesRef.get().addOnSuccessListener { categorySnapshot ->
-                categoryMap = categorySnapshot.children.associate {
+                // Filter categories by transType
+                categoryMap = categorySnapshot.children.filter {
+                    val type = it.child("type").getValue(String::class.java)
+                    type == transType // Filter by the transaction type (Expense/Income)
+                }.associate {
                     it.key!! to it.child("name").getValue(String::class.java)!!
                 }
 
-                // Fetch saving goals
-                goalRef.get().addOnSuccessListener { goalSnapshot ->
-                    // Filter the saving goals to only include those in the user's goalList
-                    goalMap = goalSnapshot.children.filter {
-                        userGoalIds.contains(it.key)
-                    }.associate {
-                        it.key!! to it.child("title").getValue(String::class.java)!!
-                    }
+                // Declare variables for names and IDs to be used across both Expense and Income
+                val categoryNames: MutableList<String> = mutableListOf("Select Category")
+                val categoryIds: MutableList<String> = mutableListOf("")
 
-                    // Combine category and filtered saving goal data
-                    val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
-                    val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
-
-                    // Set up the spinner adapter
-                    val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
-                    adapter.setDropDownViewResource(R.layout.spinner_category)
-                    binding.spinnerCategory.adapter = adapter
-
-                    binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                            selectedCategoryId = if (position == 0) null else categoryIds[position]
+                // If transType is Income, fetch saving goals
+                if (transType == "Income") {
+                    goalRef.get().addOnSuccessListener { goalSnapshot ->
+                        // Filter saving goals to only include those in the user's goalList
+                        goalMap = goalSnapshot.children.filter {
+                            userGoalIds.contains(it.key)
+                        }.associate {
+                            it.key!! to it.child("title").getValue(String::class.java)!!
                         }
 
-                        override fun onNothingSelected(parent: AdapterView<*>) {
-                            // Do nothing
-                        }
+                        // Combine category and filtered saving goal data
+                        categoryNames.addAll(goalMap.values.toList() + categoryMap.values.toList())
+                        categoryIds.addAll(goalMap.keys.toList() + categoryMap.keys.toList())
+
+                        // Set up the spinner adapter after both categories and saving goals are fetched
+                        setupSpinner(categoryNames, categoryIds)
+
+                    }.addOnFailureListener { exception ->
+                        Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
                     }
-                }.addOnFailureListener { exception ->
-                    Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
+                } else {
+                    // For Expense, only add category data
+                    categoryNames.addAll(categoryMap.values.toList())
+                    categoryIds.addAll(categoryMap.keys.toList())
+
+                    // Set up the spinner adapter immediately
+                    setupSpinner(categoryNames, categoryIds)
                 }
+
             }.addOnFailureListener { exception ->
                 Log.e("DEBUGTEST", "Error fetching categories: ${exception.message}")
             }
+
         }.addOnFailureListener { exception ->
             Log.e("DEBUGTEST", "Error fetching user goals: ${exception.message}")
+        }
+    }
+
+    private fun setupSpinner(categoryNames: List<String>, categoryIds: List<String>) {
+        // Set up the spinner adapter
+        val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)
+        adapter.setDropDownViewResource(R.layout.spinner_category)
+        binding.spinnerCategory.adapter = adapter
+
+        // Handle spinner item selection
+        binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                selectedCategoryId = if (position == 0) null else categoryIds[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // Do nothing
+            }
         }
     }
 
@@ -104,7 +132,15 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun saveTransaction(newId: String) {
         Log.d("DEBUGTEST", "saveTransaction method called with ID: $newId")
         val title = binding.editTitle.text.toString()
-        val amount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
+        var amount =0.0
+        if (transType=="Income"){
+            amount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
+        }else if (transType=="Expense"){
+            val negAmount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
+            if (negAmount>0.0){
+                amount = -negAmount
+            }
+        }
         val date = binding.editDate.text.toString()
         val notes = binding.editNotes.text.toString()
         val categoryId = selectedCategoryId ?: return // Ensure a category is selected

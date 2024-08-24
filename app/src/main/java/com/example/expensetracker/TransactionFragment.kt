@@ -4,22 +4,27 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.data.Transaction
 import com.example.expensetracker.data.User
 import com.example.expensetracker.dataAdapter.TransactionAdapter
 import com.example.expensetracker.databinding.FragmentTransactionBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 class TransactionFragment : Fragment() {
     private lateinit var binding: FragmentTransactionBinding
     private lateinit var userRef: DatabaseReference
@@ -290,13 +295,40 @@ class TransactionFragment : Fragment() {
 
         cardManual.setOnClickListener {
             dialog.dismiss()
+            showPopup2()
+        }
+
+        dialog.show()
+    }
+
+    private fun showPopup2() {
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.popup_trans_type)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.shadow_bg)
+
+        val btnIncome = dialog.findViewById<View>(R.id.btn_income)
+        val btnExpense = dialog.findViewById<View>(R.id.btn_expense)
+
+        btnIncome.setOnClickListener {
+            dialog.dismiss()
             val intent = Intent(requireContext(), AddTransactionActivity::class.java)
             intent.putExtra("userID", userID)
+            intent.putExtra("transType","Income")
+            startActivity(intent)
+        }
+
+        btnExpense.setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(requireContext(), AddTransactionActivity::class.java)
+            intent.putExtra("userID", userID)
+            intent.putExtra("transType","Expense")
             startActivity(intent)
         }
 
         dialog.show()
     }
+
 
     private fun fetchCategories() {
         val categoriesRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("Category")

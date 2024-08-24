@@ -2,17 +2,15 @@ package com.example.expensetracker
 
 import android.app.Dialog
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.BaseAdapter
 import android.widget.GridView
 import android.widget.ImageView
-import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.example.expensetracker.databinding.ActivityAddCategoryBinding
 import com.google.firebase.database.FirebaseDatabase
 
@@ -87,16 +85,26 @@ class AddCategoryActivity : AppCompatActivity() {
         // Retrieve category details from input fields
         val name = binding.editName.text.toString()
         val icon = binding.editImage.text.toString()
+        val selectedRadioId = binding.radioGroup.checkedRadioButtonId
 
-        if (name.isNotEmpty() && icon.isNotEmpty()) {
+        val type = when (selectedRadioId) {
+            R.id.radio_expense -> "Expense"
+            R.id.radio_income -> "Income"
+            else -> null // Handle the case where neither is selected
+        }
+
+        if (name.isNotEmpty() && icon.isNotEmpty() && type !=null) {
             val categoryRef = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
                 .getReference("Category")
+
+
 
             // Create a new Category object
             val category = mapOf(
                 "id" to newId,
                 "name" to name,
-                "icon" to icon
+                "icon" to icon,
+                "type" to type
             )
 
             // Save the category in Firebase
