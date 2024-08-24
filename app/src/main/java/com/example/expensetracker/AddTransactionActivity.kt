@@ -134,7 +134,10 @@ class AddTransactionActivity : AppCompatActivity() {
         val title = binding.editTitle.text.toString()
         var amount =0.0
         if (transType=="Income"){
-            amount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val posAmount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
+            if (posAmount<0.0){
+                amount = -posAmount
+            }
         }else if (transType=="Expense"){
             val negAmount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
             if (negAmount>0.0){

@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentManager
 import com.example.expensetracker.data.User
 import com.example.expensetracker.databinding.FragmentRegisterBinding
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -23,21 +24,19 @@ import com.google.firebase.database.ValueEventListener
 class RegisterFragment : Fragment() {
     private lateinit var binding: FragmentRegisterBinding
     private lateinit var userDB: DatabaseReference
-    private var nextUserId:Int =0
+    private var nextUserId:Int = 0
     private var userList : ArrayList<User> = arrayListOf()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentRegisterBinding.inflate(inflater, container, false)
-        userDB =
-            FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
-                .getReference("User")
+        userDB = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("User")
         binding.tvErrorMsg.text = ""
         requestLocationPermissions()
-        fetchData(object : InvokeFirst{
+        fetchData(object : InvokeFirst {
             override fun invoke() {
                 var a = 1
             }
@@ -65,12 +64,12 @@ class RegisterFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // Unique Email Validatio
+            // Unique Email Validation
             var isUnique = true
-            for(i in 1..userList.size){
-                if(userList[i - 1].email == email){
+            for (i in 1..userList.size) {
+                if (userList[i - 1].email == email) {
                     isUnique = false
-                    binding.tvErrorMsg.text="This Email has been registered!"
+                    binding.tvErrorMsg.text = "This Email has been registered!"
                     break
                 }
             }
@@ -85,27 +84,53 @@ class RegisterFragment : Fragment() {
                         id,
                         email,
                         password,
-                        longitude,  // Use the obtained longitude
-                        latitude,   // Use the obtained latitude
+                        longitude,
+                        latitude,
                         arrayListOf(""),
                         arrayListOf(""),
                         arrayListOf("")
                     )
 
-                    // Save the user data to the database
-                    userDB.child(user.id).setValue(user)
+                    // Register the user with Firebase Authentication
+                    val auth = FirebaseAuth.getInstance()
+                    auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                Toast.makeText(requireContext(), "Account Created", Toast.LENGTH_LONG).show()
-                                parentFragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                                // Save the user data to the database
+                                userDB.child(user.id).setValue(user)
+                                    .addOnCompleteListener { task2 ->
+                                        if (task2.isSuccessful) {
+                                            // Send verification email
+                                            auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { emailTask ->
+                                                if (emailTask.isSuccessful) {
+                                                    activity?.runOnUiThread {
+                                                        Toast.makeText(requireContext(), "Account Created. Check your email for verification.", Toast.LENGTH_LONG).show()
+                                                    }
+                                                } else {
+                                                    activity?.runOnUiThread {
+                                                        Toast.makeText(requireContext(), "Error sending verification email.", Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                            }
 
-                                // Navigate to LoginFragment
-                                parentFragmentManager.beginTransaction()
-                                    .replace(R.id.fragmentContainerView, LoginFragment())
-                                    .commit()
+                                            // Navigate to LoginFragment after account creation
+                                            Toast.makeText(requireContext(), "Please verify your email", Toast.LENGTH_LONG).show()
+                                            parentFragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                                            parentFragmentManager.beginTransaction()
+                                                .replace(R.id.fragmentContainerView, LoginFragment())
+                                                .commit()
+                                        } else {
+                                            val error = task2.exception?.message ?: "Unknown error"
+                                            activity?.runOnUiThread {
+                                                Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_LONG).show()
+                                            }
+                                        }
+                                    }
                             } else {
                                 val error = task.exception?.message ?: "Unknown error"
-                                Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_LONG).show()
+                                activity?.runOnUiThread {
+                                    Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_LONG).show()
+                                }
                             }
                         }
                 }
@@ -113,14 +138,13 @@ class RegisterFragment : Fragment() {
                 binding.tvErrorMsg.text = "Email is already in use."
             }
         }
+
         binding.tvLoginText2.setOnClickListener {
             parentFragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, LoginFragment())
                 .commit()
         }
-
 
         return binding.root
     }
@@ -177,12 +201,14 @@ class RegisterFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_LONG).show()
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_LONG).show()
+                }
             }
         })
     }
 
-    interface InvokeFirst{
+    interface InvokeFirst {
         fun invoke()
     }
 
@@ -191,11 +217,11 @@ class RegisterFragment : Fragment() {
     private fun checkLocationPermissions(): Boolean {
         return ActivityCompat.checkSelfPermission(
             requireContext(),
-            android.Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(
                     requireContext(),
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    Manifest.permission.ACCESS_COARSE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -203,8 +229,8 @@ class RegisterFragment : Fragment() {
         ActivityCompat.requestPermissions(
             requireActivity(),
             arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ),
             LOCATION_REQUEST_CODE
         )
@@ -220,65 +246,22 @@ class RegisterFragment : Fragment() {
                     requireContext(),
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
-            ) {                        Toast.makeText(requireContext(), "Unable to retrieve location", Toast.LENGTH_SHORT).show()
-
+            ) {
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), "Unable to retrieve location", Toast.LENGTH_SHORT).show()
+                }
                 return
             }
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    if (location != null) {
-                        val latitude = location.latitude.toString()
-                        val longitude = location.longitude.toString()
-                        // Call the callback with the latitude and longitude
-                        callback(latitude, longitude)
-                    } else {
-                        Toast.makeText(requireContext(), "Unable to retrieve location", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .addOnFailureListener {
-                    // Handle failure
-                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+                    val latitude = location?.latitude?.toString() ?: "0.0"
+                    val longitude = location?.longitude?.toString() ?: "0.0"
+                    callback(latitude, longitude)
                 }
         } else {
-            // Request permissions if not granted
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                LOCATION_REQUEST_CODE
-            )
-        }
-    }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            val fineLocationGranted = grantResults.isNotEmpty() &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED
-            val coarseLocationGranted = grantResults.size > 1 &&
-                    grantResults[1] == PackageManager.PERMISSION_GRANTED
-
-            if (fineLocationGranted || coarseLocationGranted) {
-                // Request the current location with a callback to handle latitude and longitude
-                getCurrentLocation { latitude, longitude ->
-                    // Handle the obtained latitude and longitude here if needed
-                    Toast.makeText(requireContext(), "Latitude: $latitude, Longitude: $longitude", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                Toast.makeText(requireContext(), "Location permission is required to access your location.", Toast.LENGTH_SHORT).show()
+            activity?.runOnUiThread {
+                Toast.makeText(requireContext(), "Location permissions are required", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
-
-
 }

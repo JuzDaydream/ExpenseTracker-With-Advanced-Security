@@ -80,4 +80,7 @@ dependencies {
 //chart
 //    implementation ("com.github.AnyChart:AnyChart-Android:1.1.2")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    //verification email
+    implementation ("com.google.firebase:firebase-auth:21.0.6")
 }
