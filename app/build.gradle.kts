@@ -83,4 +83,10 @@ dependencies {
 
     //verification email
     implementation ("com.google.firebase:firebase-auth:21.0.6")
+
+    //fingerprint scan
+    implementation ("androidx.biometric:biometric:1.1.0")
+    implementation ("androidx.biometric:biometric:1.2.0-alpha05") // or the latest version
+
+
 }

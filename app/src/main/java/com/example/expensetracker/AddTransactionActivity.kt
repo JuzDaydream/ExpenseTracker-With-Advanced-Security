@@ -137,11 +137,15 @@ class AddTransactionActivity : AppCompatActivity() {
             val posAmount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
             if (posAmount<0.0){
                 amount = -posAmount
+            }else {
+                amount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
             }
         }else if (transType=="Expense"){
             val negAmount = binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
             if (negAmount>0.0){
                 amount = -negAmount
+            }else{
+                amount= binding.editAmount.text.toString().toDoubleOrNull() ?: 0.0
             }
         }
         val date = binding.editDate.text.toString()

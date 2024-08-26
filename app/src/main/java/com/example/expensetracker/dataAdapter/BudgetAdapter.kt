@@ -13,7 +13,7 @@ import com.example.expensetracker.data.Budget
 import com.example.expensetracker.data.Transaction
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 import kotlin.math.absoluteValue
 
 class BudgetAdapter(
@@ -63,7 +63,9 @@ class BudgetAdapter(
 
         val percent = if (budget.amount != 0.0) (remainingAmount / budget.amount) * 100 else 0.0
         holder.budgetPercent.text = "${percent.toInt()}%"
-
+        if (percent <= 0){
+            holder.budgetPercent.text = "0%"
+        }
         holder.budgetStartDate.text = budget.startDate
         holder.budgetEndDate.text = budget.endDate
 
