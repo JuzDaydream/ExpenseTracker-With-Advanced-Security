@@ -88,5 +88,19 @@ dependencies {
     implementation ("androidx.biometric:biometric:1.1.0")
     implementation ("androidx.biometric:biometric:1.2.0-alpha05") // or the latest version
 
+//scanreceipt
 
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation("com.google.code.gson:gson:2.8.6")
+// https://mvnrepository.com/artifact/com.squareup.okhttp3/logging-interceptor
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+// https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-urlconnection
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.9.3")
+    // implementation("com.github.bumptech.glide:glide:4.14.2")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    runtimeOnly("com.github.bumptech.glide:compiler:4.11.0")
+//for resize the image
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
 }
