@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
@@ -22,51 +24,57 @@ class AuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
 
-        // Firebase initialization and loading
-        initializeFirebaseAndLoadData {
-            val sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-
-            // Retrieve the onboarding completion status and user ID
-            val isOnboardingComplete = sharedPreferences.getBoolean("isOnboardingComplete", false)
-            val userID = sharedPreferences.getString("userID", null)
-
-            Log.d("DEBUGTEST", "Is Onboarding Complete: $isOnboardingComplete")
-            Log.d("DEBUGTEST", "User ID: $userID")
-
-            if (!isOnboardingComplete) {
-                // First time, go to OnboardingActivity
-                val intent = Intent(this, OnboardActivity::class.java)
-                startActivity(intent)
-                finish() // Close this activity so the user can't return to it
-            } else if (userID != null) {
-                // User is logged in, trigger fingerprint authentication after loading is complete
-                authenticateWithFingerprint(sharedPreferences)
-            } else {
-                // No user logged in, proceed with the auth flow (e.g., LoginFragment)
-                navigateToLoginFragment()
-            }
-        }
+        // Start Firebase initialization and loading
+        initializeFirebaseAndLoadData()
     }
 
     // Simulate Firebase initialization and data loading
-    private fun initializeFirebaseAndLoadData(onLoadingComplete: () -> Unit) {
+    private fun initializeFirebaseAndLoadData() {
         FirebaseApp.initializeApp(this)
 
         // Simulate loading (e.g., fetching user data from Firebase)
         FirebaseAuth.getInstance().currentUser?.let { user ->
-            // Simulating data loading delay
             Log.d("DEBUGTEST", "Loading user data...")
 
-            // Trigger the callback after data is loaded
-            onLoadingComplete()
+            // Simulating data loading delay
+            // For demonstration, we're using a fake delay. Replace this with actual loading logic.
+            Handler(Looper.getMainLooper()).postDelayed({
+                onLoadingComplete()
+            }, 2000)  // Simulated 2-second loading delay
+
         } ?: run {
             Log.d("DEBUGTEST", "User not authenticated.")
             onLoadingComplete()
         }
     }
 
+    private fun onLoadingComplete() {
+        isLoadingComplete = true
+        val sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+
+        // Retrieve the onboarding completion status and user ID
+        val isOnboardingComplete = sharedPreferences.getBoolean("isOnboardingComplete", false)
+        val userID = sharedPreferences.getString("userID", null)
+
+        Log.d("DEBUGTEST", "Is Onboarding Complete: $isOnboardingComplete")
+        Log.d("DEBUGTEST", "User ID: $userID")
+
+        if (!isOnboardingComplete) {
+            // First time, go to OnboardingActivity
+            val intent = Intent(this, OnboardActivity::class.java)
+            startActivity(intent)
+            finish() // Close this activity so the user can't return to it
+        } else if (userID != null) {
+            // User is logged in, trigger fingerprint authentication after loading is complete
+            authenticateWithFingerprint(sharedPreferences)
+        } else {
+            // No user logged in, proceed with the auth flow (e.g., LoginFragment)
+            navigateToLoginFragment()
+        }
+    }
+
     private fun authenticateWithFingerprint(sharedPreferences: SharedPreferences) {
-        if (isAuthenticating) return  // Prevent duplicate calls
+        if (!isLoadingComplete || isAuthenticating) return  // Ensure loading is complete and prevent duplicate calls
         isAuthenticating = true
 
         val executor = ContextCompat.getMainExecutor(this)
