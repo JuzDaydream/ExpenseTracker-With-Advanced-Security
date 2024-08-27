@@ -552,7 +552,7 @@ class ScanReceiptActivity : AppCompatActivity() {
                                 editTitle.setText(invoiceDetails.title)
                                 editAmount.setText(invoiceDetails.amount)
                                 editDate.setText(invoiceDetails.date)
-                                Toast.makeText(this@ScanReceiptActivity, "Extracted text: $parsedText", Toast.LENGTH_LONG).show()
+//                                Toast.makeText(this@ScanReceiptActivity, "Extracted text: $parsedText", Toast.LENGTH_LONG).show()
                                 // Send the extracted text to MeaningCloud API for classification
                                 classifyTextWithMeaningCloud(parsedText)
                             } else {

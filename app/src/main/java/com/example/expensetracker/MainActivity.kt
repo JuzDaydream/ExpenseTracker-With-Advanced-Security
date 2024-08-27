@@ -1,9 +1,7 @@
 package com.example.expensetracker
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.appcompat.app.AppCompatActivity
 import com.example.expensetracker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -16,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         userID = intent.getStringExtra("userID").toString()
-        Toast.makeText(this, userID, Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, userID, Toast.LENGTH_SHORT).show()
         binding.navBtm.setOnItemSelectedListener {menuItem ->
 
             when (menuItem.itemId) {
