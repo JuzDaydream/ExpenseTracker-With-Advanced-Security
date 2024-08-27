@@ -3,10 +3,10 @@ package com.example.expensetracker
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.example.expensetracker.databinding.FragmentSettingBinding
 
 class SettingFragment : Fragment() {
@@ -29,7 +29,7 @@ class SettingFragment : Fragment() {
             requireActivity().finish()
         }
         binding.cardCreateSpending.setOnClickListener {
-            val intent = Intent(requireContext(), SpendingAnalysisActivity::class.java)
+            val intent = Intent(requireContext(), SpendingAnalysisCreatedActivity::class.java)
             val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             val userId = sharedPreferences.getString("userID", "")
             intent.putExtra("userID", userId)
