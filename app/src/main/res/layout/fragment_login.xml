@@ -8,6 +8,18 @@
     android:background="@color/black"
     tools:context=".LoginFragment">
 
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:text="Expense Tracker"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/card"
+        app:layout_constraintStart_toStartOf="@+id/card" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/card"
         android:layout_width="0dp"
