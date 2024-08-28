@@ -1,11 +1,15 @@
 package com.example.expensetracker
+//import com.google.firebase.database.core.view.View
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -22,15 +26,14 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
-
 
 class SpendingAnalysisCreatedActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var databaseReference1: DatabaseReference
     private lateinit var userID: String
     private lateinit var tvAmount: TextView
+    private lateinit var tvRecom: TextView
     private lateinit var barChartTop: BarChart
     private lateinit var barChartBottom: BarChart
     private val transactionList = ArrayList<Transaction>()
@@ -39,6 +42,8 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
     private lateinit var spinner_year2: Spinner
     private lateinit var btn_compare: AppCompatButton
     private val categoriesMap = mutableMapOf<String, String>() // Maps categoryId to categoryName
+    private var previousYearSelection = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -46,7 +51,7 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
 
         userID = intent.getStringExtra("userID") ?: return
         Log.d("SpendingAnalysisActivity", "Received userId: $userID")
-
+        tvRecom= findViewById(R.id.tv_recom)
         tvAmount = findViewById(R.id.tv_amount)
         barChartTop = findViewById(R.id.barChartTop)
         barChartBottom = findViewById(R.id.chart_bottom)
@@ -54,11 +59,13 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
         spinner_year2 = findViewById(R.id.spinner_year2)
         btn_compare = findViewById(R.id.btn_compare)
 
+        // Disable button initially
+        btn_compare.isEnabled = false
+
         val iconBack: ImageView = findViewById(R.id.icon_back)
         iconBack.setOnClickListener {
             finish()
         }
-
 
         databaseReference = FirebaseDatabase.getInstance("https://expensetracker-a260c-default-rtdb.asia-southeast1.firebasedatabase.app")
             .getReference("User").child(userID).child("transactionList")
@@ -67,7 +74,68 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
         fetchCategories()
         fetchAllTransactions()
         fetchAllTransactions1()
-        populateSpinners()
+
+        // Set up item selected listeners
+        spinner_year.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedYear1 = spinner_year.selectedItem.toString()
+                val selectedYear2 = spinner_year2.selectedItem?.toString() ?: ""
+
+                if (selectedYear1 == selectedYear2) {
+                    Toast.makeText(this@SpendingAnalysisCreatedActivity, "Please select a different year", Toast.LENGTH_SHORT).show()
+                    spinner_year.setSelection(0) // Reset the spinner to the first item
+                    btn_compare.isEnabled = false
+                }
+                else{
+                    btn_compare.isEnabled = true
+
+
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+
+        }
+
+        spinner_year2.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedYear1 = spinner_year.selectedItem?.toString() ?: ""
+                val selectedYear2 = spinner_year2.selectedItem.toString()
+
+                if (selectedYear1 == selectedYear2) {
+                    Toast.makeText(this@SpendingAnalysisCreatedActivity, "Please select a different year", Toast.LENGTH_SHORT).show()
+                    spinner_year2.setSelection(0) // Reset the spinner to the first item
+                    btn_compare.isEnabled = false
+                }
+                else{
+                    btn_compare.isEnabled = true
+
+
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        btn_compare.setOnClickListener {
+            val selectedYear1 = spinner_year.selectedItem?.toString()?.replace("YEAR ", "")?.toIntOrNull()
+            val selectedYear2 = spinner_year2.selectedItem?.toString()?.replace("YEAR ", "")?.toIntOrNull()
+            Toast.makeText(this, "Compare button clicked", Toast.LENGTH_SHORT).show()
+            if (selectedYear1 == null || selectedYear2 == null || selectedYear1 == selectedYear2) {
+                Toast.makeText(this, "Please select two different valid years for comparison.", Toast.LENGTH_SHORT).show()
+            } else if (selectedYear1 <= selectedYear2) {
+                Toast.makeText(this, "Year 1 should be greater than Year 2 for comparison.", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                val categoryYearSpending = sortTransactionsForChartBottom()
+
+                Log.d("GivingAnalysis", "Calling identifyAndFlagSpendingIncreases with categoryYearSpending: $categoryYearSpending, selectedYear1: $selectedYear1, selectedYear2: $selectedYear2")
+
+                identifyAndFlagSpendingIncreases(categoryYearSpending, selectedYear1, selectedYear2,tvRecom)
+
+            }
+        }
+
     }
 
     private fun fetchCategories() {
@@ -99,8 +167,8 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
                         val transactionId = transactionSnapshot.value.toString()
                         fetchTransactionDetails(transactionId, transactionCount)
 
-
                     }
+
                 } else {
                     Log.d("CreateSpendAnalysis", "No transactions found")
                 }
@@ -131,7 +199,8 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
 
                     sortTransactions()
                     updateUI()
-
+                    Log.d("TransactionListSize", "Transaction list size: ${transactionList.size}") // Add this log message
+                    populateSpinners()
 
                 }
             }
@@ -426,40 +495,66 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
 
 
         barChartBottom.invalidate() // Refresh the chart
+        // identifyAndFlagSpendingIncreases(categoryYearSpending) // Add this line to flag increases
     }
 
     private fun populateSpinners() {
-        Log.d("SpendingAnalysis", "populateSpinners called.")
+        val years = mutableListOf<String>()
 
-        if (transactionList.isEmpty()) {
-            Log.e("SpendingAnalysis", "Transaction list is empty!")
-            return
+        // Get unique years from transactionList
+        transactionList.forEach { transaction ->
+            val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(transaction.date)!!)
+            if (!years.contains(year)) {
+                years.add(year)
+            }
         }
 
-        val years = transactionList.map {
-            val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(it.date))
-            Log.d("SpendingAnalysis", "Year extracted: $year")
-            year
-        }.distinct()
+        // Sort years in ascending order
+        years.sort()
 
-        Log.d("SpendingAnalysis", "Years for spinner: $years")
+        // Add "YEAR" before each year
+        val yearsWithYear = years.map { "YEAR $it" }
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, years)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner_year.adapter = adapter
-        spinner_year2.adapter = adapter
+        // Create adapters for spinners
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, yearsWithYear)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        // Set adapters to spinners
+        spinner_year.adapter = spinnerAdapter
+        spinner_year2.adapter = spinnerAdapter
+        // Log the years that are being added to the spinner
+        Log.d("SpinnerYears", "Years in spinner: $yearsWithYear")
     }
 
-    private fun parseDate(date: String): Date {
-        return try {
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            dateFormat.parse(date) ?: Date()
-        } catch (e: Exception) {
-            Log.e("YearlyStatFragment", "Failed to parse date: $date", e)
-            Date() // Return a default date or handle the error appropriately
+
+    private fun identifyAndFlagSpendingIncreases(
+        categoryYearSpending: HashMap<String, HashMap<Int, Double>>,
+        selectedYear1: Int,
+        selectedYear2: Int,
+        tvRecom: TextView // Add a parameter to pass the TextView
+    ) {
+        Log.d("StartGivingAnalysis", "Calling identifyAndFlagSpendingIncreases with categoryYearSpending: $categoryYearSpending, selectedYear1: $selectedYear1, selectedYear2: $selectedYear2")
+        val resultText = StringBuilder() // Use StringBuilder to build the result string
+
+        for ((category, yearSpendingMap) in categoryYearSpending) {
+            val spendingYear1 = yearSpendingMap[selectedYear1] ?: 0.0
+            val spendingYear2 = yearSpendingMap[selectedYear2] ?: 0.0
+
+            if (spendingYear2 > spendingYear1) {
+                Log.d("SpendingIncrease", "Category $category has increased spending from $selectedYear1 to $selectedYear2")
+                resultText.append("Increased spending in $category when comparing $selectedYear1 with $selectedYear2\n")
+            } else if (spendingYear2 < spendingYear1) {
+                Log.d("SpendingDecrease", "Category $category has decreased spending from $selectedYear1 to $selectedYear2")
+                resultText.append("Decreased spending in $category when comparing $selectedYear1 with $selectedYear2\n")
+            } else {
+                Log.d("SpendingUnchanged", "Category $category has unchanged spending from $selectedYear1 to $selectedYear2")
+                resultText.append("Unchanged spending in $category when comparing $selectedYear1 with $selectedYear2\n")
+            }
         }
-    }
 
+        // Update the TextView with the result
+        tvRecom.text = resultText.toString()
+    }
 
 
 }

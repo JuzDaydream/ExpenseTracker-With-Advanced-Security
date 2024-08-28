@@ -199,34 +199,57 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/card_balance_bottom" />
 
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="Compare"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="@+id/spinner_year"
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="With"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="@+id/spinner_year2"
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
             <Spinner
                 android:id="@+id/spinner_year"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginTop="8dp"
                 android:background="@android:color/transparent"
                 app:layout_constraintEnd_toStartOf="@+id/spinner_year2"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textView2"
+                app:layout_constraintTop_toBottomOf="@id/textView3"
                 app:layout_constraintWidth_percent="0.45" />
 
             <Spinner
                 android:id="@+id/spinner_year2"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+
                 android:layout_marginTop="8dp"
                 android:background="@android:color/transparent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/spinner_year"
-                app:layout_constraintTop_toBottomOf="@id/textView2"
+                app:layout_constraintTop_toBottomOf="@id/textView3"
                 app:layout_constraintWidth_percent="0.45" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_compare"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="15dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="30dp"
                 android:background="@drawable/btn_white"
                 android:text="Compare"
                 android:textAllCaps="false"
@@ -237,7 +260,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/spinner_year" />
 
             <TextView
-                android:id="@+id/tv_chart_bottom_label"
+                android:id="@+id/tv_recom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
