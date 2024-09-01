@@ -23,7 +23,6 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -177,7 +176,7 @@ class YearlyStatFragment : Fragment() {
             isInYear
         }
 
-        val sortedTransactions = filteredTransactions.sortedByDescending { it.amount }
+        val sortedTransactions = filteredTransactions.sortedBy { it.amount }
 
         Log.d("YearlyStatFragment", "Filtered transactions count: ${sortedTransactions.size}")
 
@@ -242,43 +241,54 @@ class YearlyStatFragment : Fragment() {
     private fun updatePieChart(groupedTransactions: List<Pair<String, Double>>, categoryMap: Map<String, String>) {
         val pieChart = view?.findViewById<PieChart>(R.id.chart) ?: return
 
+        // Calculate total amount for all categories
+        val totalAmount = groupedTransactions.sumOf { Math.abs(it.second) }
+
+        // Calculate percentage for each category and sort by percentage
+        val sortedEntries = groupedTransactions
+            .map { (category, amount) ->
+                val percentage = (Math.abs(amount) / totalAmount) * 100
+                Pair(category, percentage)
+            }
+            .sortedByDescending { it.second } // Sort by percentage in descending order
+
         // Prepare data for the pie chart
         val entries = ArrayList<PieEntry>()
-        for ((category, totalAmount) in groupedTransactions) {
+        for ((category, percentage) in sortedEntries) {
             val categoryName = categoryMap[category] ?: "Unknown"
-            entries.add(PieEntry(Math.abs(totalAmount).toFloat(), categoryName))
+            entries.add(PieEntry(percentage.toFloat(), categoryName))
         }
 
         // Create a dataset and set its properties
         val dataSet = PieDataSet(entries, "Category")
+        dataSet.setColors(Color.parseColor("#a786bf"),Color.parseColor("#d54f88"),
+            Color.parseColor("#ff9758"),Color.parseColor("#6ea683"),
+            Color.parseColor("#1186d5"),Color.parseColor("#9b7d8f"),
+            Color.parseColor("#ff6f6f"),Color.parseColor("#4b9aa8"), 255)
 
-        dataSet.setColors(ColorTemplate.JOYFUL_COLORS, 255)
         dataSet.valueTextColor = Color.parseColor("#FCFCFD")
-        dataSet.valueTextSize = 14f
+        dataSet.valueTextSize = 12f
         dataSet.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
-                return String.format("RM%.2f", value)  // Ensure two decimal places
+                return String.format("%.2f%%", value)  // Format as percentage with two decimal places
             }
         }
-            // Create PieData and set it to the chart
+
+        // Create PieData and set it to the chart
         val pieData = PieData(dataSet)
         pieChart.data = pieData
 
         // Customize pie chart appearance
         pieChart.description.isEnabled = false
-
         pieChart.setBackgroundColor(Color.parseColor("#222222"))
-//            pieChart.legend.position = com.github.mikephil.charting.components.Legend.LegendPosition.RIGHT_OF_CHART
-        pieChart.legend.orientation =
-            com.github.mikephil.charting.components.Legend.LegendOrientation.VERTICAL
+        pieChart.legend.orientation = com.github.mikephil.charting.components.Legend.LegendOrientation.VERTICAL
         pieChart.legend.textColor = Color.parseColor("#FCFCFD")
-        pieChart.legend.textSize = (14f)
+        pieChart.legend.textSize = 5f
         pieChart.setDrawHoleEnabled(true)
         pieChart.holeRadius = 55f
         pieChart.setHoleColor(Color.TRANSPARENT)
-        pieChart.setEntryLabelColor(Color.parseColor("#FCFCFD"))
-        pieChart.setEntryLabelTextSize(14f) // Set text size for labels
-
+        pieChart.setEntryLabelColor(Color.TRANSPARENT)
+        pieChart.setEntryLabelTextSize(0f) // Set text size for labels
 
         // Refresh chart
         pieChart.invalidate()

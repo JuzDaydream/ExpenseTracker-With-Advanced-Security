@@ -99,9 +99,13 @@ class EditTransactionActivity : AppCompatActivity() {
     }
 
     private fun populateSpinner() {
+        val sortedGoals = goalMap.toList().sortedBy { (_, value) -> value }.toMap()
+
+        val sortedCategories = categoryMap.toList().sortedBy { (_, value) -> value }.toMap()
+
         // Combine category and saving goal data
-        val categoryNames = listOf("Select Category") + goalMap.values.toList() + categoryMap.values.toList()
-        val categoryIds = listOf("") + goalMap.keys.toList() + categoryMap.keys.toList()
+        val categoryNames = listOf("Select Category") + sortedGoals.values.toList() + sortedCategories.values.toList()
+        val categoryIds = listOf("") + sortedGoals.keys.toList() + sortedCategories.keys.toList()
 
         // Set up the spinner adapter
         val adapter = ArrayAdapter(this, R.layout.spinner_category, R.id.text1, categoryNames)

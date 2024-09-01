@@ -72,8 +72,8 @@ class AddTransactionActivity : AppCompatActivity() {
                 val categoryNames: MutableList<String> = mutableListOf("Select Category")
                 val categoryIds: MutableList<String> = mutableListOf("")
 
-                // If transType is Income, fetch saving goals
                 if (transType == "Income") {
+                    // If transType is Income, fetch saving goals
                     goalRef.get().addOnSuccessListener { goalSnapshot ->
                         // Filter saving goals to only include those in the user's goalList
                         goalMap = goalSnapshot.children.filter {
@@ -82,9 +82,15 @@ class AddTransactionActivity : AppCompatActivity() {
                             it.key!! to it.child("title").getValue(String::class.java)!!
                         }
 
-                        // Combine category and filtered saving goal data
-                        categoryNames.addAll(goalMap.values.toList() + categoryMap.values.toList())
-                        categoryIds.addAll(goalMap.keys.toList() + categoryMap.keys.toList())
+                        // Sort saving goals alphabetically
+                        val sortedGoals = goalMap.toList().sortedBy { (_, value) -> value }.toMap()
+
+                        // Sort categories alphabetically
+                        val sortedCategories = categoryMap.toList().sortedBy { (_, value) -> value }.toMap()
+
+                        // Combine sorted saving goals and categories
+                        categoryNames.addAll(sortedGoals.values + sortedCategories.values)
+                        categoryIds.addAll(sortedGoals.keys + sortedCategories.keys)
 
                         // Set up the spinner adapter after both categories and saving goals are fetched
                         setupSpinner(categoryNames, categoryIds)
@@ -93,9 +99,12 @@ class AddTransactionActivity : AppCompatActivity() {
                         Log.e("DEBUGTEST", "Error fetching saving goals: ${exception.message}")
                     }
                 } else {
-                    // For Expense, only add category data
-                    categoryNames.addAll(categoryMap.values.toList())
-                    categoryIds.addAll(categoryMap.keys.toList())
+                    // For Expense, sort all categories alphabetically
+                    val sortedCategories = categoryMap.toList().sortedBy { (_, value) -> value }.toMap()
+
+                    // Add sorted category data
+                    categoryNames.addAll(sortedCategories.values)
+                    categoryIds.addAll(sortedCategories.keys)
 
                     // Set up the spinner adapter immediately
                     setupSpinner(categoryNames, categoryIds)
