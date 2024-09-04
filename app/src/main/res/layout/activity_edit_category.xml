@@ -17,6 +17,7 @@
         android:background="@drawable/btn_white"
         android:text="Update"
         android:textAllCaps="false"
+        android:textColor="@color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/btn_remove"
