@@ -5,7 +5,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -21,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -919,45 +919,48 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
                 btn_generate.visibility = View.VISIBLE
                 btn_generate.isEnabled = true
                 btn_generate.setOnClickListener {
-                    println("button clicked")
                     Log.d("GenerateButton", "Button clicked, generating report...")
 
-                    // Create a new file
-                    val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "report.txt")
+                    // Path to the public Downloads directory
+                    val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val file = File(downloadDir, "report.txt")
                     Log.d("GenerateButton", "File path: ${file.absolutePath}")
 
-                    // Check if the file already exists
-                    if (file.exists()) {
-                        Log.d("GenerateButton", "File already exists, appending to it...")
-                    } else {
-                        Log.d("GenerateButton", "File does not exist, creating a new one...")
-                    }
+                    // Check and request permission if necessary
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                        Log.d("GenerateButton", "Permission granted, writing to file...")
 
-                    try {
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 123)
-                        } else {
+                        try {
+                            // Ensure the file is created
+                            if (!file.exists()) {
+                                Log.d("GenerateButton", "File does not exist, creating a new one...")
+                                file.createNewFile()
+                            }
+
                             // Write to the file
-                            // Write the resultText to the file
-                            val writer = FileWriter(file)
-                            writer.write(resultText.toString())
-                            writer.close()
-                            Log.d("GenerateButton", "Wrote resultText to file: ${resultText.toString()}")
+                            FileWriter(file).use { writer ->
+                                writer.write(resultText.toString())  // Replace resultText with your actual data
+                                Log.d("GenerateButton", "Wrote resultText to file: ${resultText.toString()}")
+                            }
+
+                            // Open the file using an Intent
+                            val fileUri = FileProvider.getUriForFile(this, "${packageName}.provider", file)
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(fileUri, "text/plain")
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            startActivity(intent)
+
+                            Log.d("GenerateButton", "Report generation complete!")
+                        } catch (e: IOException) {
+                            Log.e("GenerateButton", "Error writing to file: ${e.message}")
+                        } catch (e: Exception) {
+                            Log.e("GenerateButton", "Error generating report: ${e.message}")
                         }
-
-
-                        // Open the file using an Intent
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.setDataAndType(Uri.fromFile(file), "text/plain")
-                        startActivity(intent)
-
-                        Log.d("GenerateButton", "Report generation complete!")
-                    } catch (e: IOException) {
-                        Log.e("GenerateButton", "Error writing to file: ${e.message}")
-                    } catch (e: Exception) {
-                        Log.e("GenerateButton", "Error generating report: ${e.message}")
+                    } else {
+                        Log.e("GenerateButton", "Permission not granted to write to external storage.")
+                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 123)
                     }
-
                 }
             } //endif for resulttext.empty
 
