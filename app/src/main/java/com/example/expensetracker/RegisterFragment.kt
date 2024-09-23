@@ -47,7 +47,7 @@ class RegisterFragment : Fragment() {
             val password = binding.editPass.text.toString().trim()
 
             // Email Validation
-            if (email.isEmpty() || !email.contains("@") || !email.endsWith(".com")) {
+            if (email.isEmpty() || !email.contains("@") || ((!email.endsWith(".com"))&&(!email.endsWith(".my")))) {
                 binding.tvErrorMsg.text = "Invalid email"
                 return@setOnClickListener
             }

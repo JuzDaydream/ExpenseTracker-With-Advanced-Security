@@ -155,11 +155,11 @@ class SpendingAnalysisCreatedActivity : AppCompatActivity() {
         btn_compare.setOnClickListener {
             val selectedYear1 = spinner_year.selectedItem?.toString()?.replace("YEAR ", "")?.toIntOrNull()
             val selectedYear2 = spinner_year2.selectedItem?.toString()?.replace("YEAR ", "")?.toIntOrNull()
-            Toast.makeText(this, "Compare button clicked", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Compare button clicked", Toast.LENGTH_SHORT).show()
             if (selectedYear1 == null || selectedYear2 == null || selectedYear1 == selectedYear2) {
                 Toast.makeText(this, "Please select two different valid years for comparison.", Toast.LENGTH_SHORT).show()
             } else if (selectedYear1 <= selectedYear2) {
-                Toast.makeText(this, "Year 1 should be greater than Year 2 for comparison.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Year Leftside should be greater than Year Rightside for comparison.", Toast.LENGTH_SHORT).show()
             }
             else {
                 val categoryYearSpending = sortTransactionsForChartBottom()
